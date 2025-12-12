@@ -3,8 +3,8 @@ $(document).ready(function(){
     $('.gallery-slider').slick({
         slidesToShow: 3,
         slidesToScroll: 1,
-        centerMode: true,
-        focusOnSelect: true,
+        centerMode: false,
+        focusOnSelect: false,
         arrows: true,
         dots: false,
         infinite: true,
@@ -21,26 +21,33 @@ $(document).ready(function(){
     });
     
     // Расчет общего количества страниц
-    const totalSlides = $('.gallery-slider .slide').length;
-    const slidesPerPage = window.innerWidth <= 768 ? 1 : 3;
-    const totalPages = Math.ceil(totalSlides / slidesPerPage);
-    $('.total-pages').text(totalPages);
+    function calculateTotalPages() {
+        const totalSlides = $('.gallery-slider .slide').length;
+        // Всегда показываем общее количество слайдов как количество страниц
+        return totalSlides;
+    }
     
-    // Обновление пейджера при изменении слайда
-    $('.gallery-slider').on('afterChange', function(event, slick, currentSlide){
-        const currentPage = Math.floor(currentSlide / slidesPerPage) + 1;
-        $('.current-page').text(currentPage);
-    });
-    
-    // Обновление количества страниц при изменении размера окна
-    $(window).on('resize', function(){
-        const newSlidesPerPage = window.innerWidth <= 768 ? 1 : 3;
-        const newTotalPages = Math.ceil(totalSlides / newSlidesPerPage);
-        $('.total-pages').text(newTotalPages);
-        
-        // Обновление текущей страницы
+    // Обновление пейджера
+    function updatePager() {
+        const totalPages = calculateTotalPages();
         const currentSlide = $('.gallery-slider').slick('slickCurrentSlide');
-        const currentPage = Math.floor(currentSlide / newSlidesPerPage) + 1;
+        const totalSlides = $('.gallery-slider .slide').length;
+        
+        // Рассчитываем текущую страницу (от 1 до 8, а не до 3)
+        // Используем модуль для обработки infinite режима
+        const actualSlide = currentSlide % totalSlides;
+        const currentPage = actualSlide + 1;
+        
+        $('.total-pages').text(totalPages);
         $('.current-page').text(currentPage);
+    }
+    
+    // Инициализация
+    updatePager();
+    
+    // События
+    $('.gallery-slider').on('afterChange', updatePager);
+    $(window).on('resize', function(){
+        setTimeout(updatePager, 100);
     });
 });
